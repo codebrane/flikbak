@@ -1,0 +1,43 @@
+Welcome to FlikBak!
+
+FlikBak is a commandline utility that backs up your Flickr photos. To do so, enter the command:
+
+ruby flikbak.rb BACKUP_DIR PHOTO_TYPE
+
+BACKUP_DIR
+----------
+This is the full path to the directory where you want to store your photos. The first part
+of the path must exist. e.g.
+/Users/flickr/photos/flickr-backup
+the directory /Users/flickr/photos must exist. The utility will create the "flickr-backup" directory.
+
+PHOTO_TYPE
+----------
+This determines which types of photo are backed up. The options are:
+square
+thumbnail
+small
+medium
+original
+
+Photos not in sets
+==================
+Photos not in sets are downloaded to BACKUP_DIR.
+
+Photos in sets
+==============
+Photos in sets are downloaded to:
+BACKUP_DIR/PhotosetName/PhotoTitle.jpg
+Weird characters in the photoset name and photo title such as " " "," "/" "\"
+are changed to underscores "_" to allow them to be created as files on the disk.
+
+Collections
+===========
+Currently there is no Flickr API to download collections information.
+
+Videos
+======
+Currently there is no Flickr API to download videos. They can only be streamed using the
+Flickr flash player.
+
+Send any comments and suggestions to alistair@codebrane.com
