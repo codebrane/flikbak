@@ -2,31 +2,45 @@ Welcome to FlikBak!
 
 FlikBak is a commandline utility that backs up your Flickr photos. To do so, enter the command:
 
+o Requirements
+o Usage
+o Photos not in sets
+o Photos in sets
+o Collections
+o Videos
+o More information
+
+Requirements
+============
+FlikBak only requires a normal install of Ruby. No extra gems are required.
+
+Usage
+=====
 ruby flikbak.rb API_KEY SECRET BACKUP_DIR PHOTO_TYPE
 
-API_KEY, SECRET
----------------
-Before you can use FlikBak, you need to get an api key and secret from Flickr. Go to the page:
-http://www.flickr.com/services/api/misc.overview.html
-login to Flickr and click on "Apply for a new API Key".
-Choose a "Non-Commercial API Key", fill in the details and then note your api key and secret.
-Pass these to FlikBak to start backing up your photos.
+	API_KEY, SECRET
+	---------------
+	Before you can use FlikBak, you need to get an api key and secret from Flickr. Go to the page:
+	http://www.flickr.com/services/api/misc.overview.html
+	login to Flickr and click on "Apply for a new API Key".
+	Choose a "Non-Commercial API Key", fill in the details and then note your api key and secret.
+	Pass these to FlikBak to start backing up your photos.
 
-BACKUP_DIR
-----------
-This is the full path to the directory where you want to store your photos. The first part
-of the path must exist. e.g.
-/Users/flickr/photos/flickr-backup
-the directory /Users/flickr/photos must exist. The utility will create the "flickr-backup" directory.
+	BACKUP_DIR
+	----------
+	This is the full path to the directory where you want to store your photos. The first part
+	of the path must exist. e.g.
+	/Users/flickr/photos/flickr-backup
+	the directory /Users/flickr/photos must exist. The utility will create the "flickr-backup" directory.
 
-PHOTO_TYPE
-----------
-This determines which types of photo are backed up. The options are:
-square
-thumbnail
-small
-medium
-original
+	PHOTO_TYPE
+	----------
+	This determines which types of photo are backed up. The options are:
+	square
+	thumbnail
+	small
+	medium
+	original
 
 Photos not in sets
 ==================
@@ -48,4 +62,6 @@ Videos
 Currently there is no Flickr API to download videos. They can only be streamed using the
 Flickr flash player.
 
+More information
+================
 Send any comments and suggestions to alistair@codebrane.com
