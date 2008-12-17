@@ -8,15 +8,15 @@ require 'flickr'
 require 'downloader'
 require 'utils'
 
-if ARGV.length != 2
+if ARGV.length != 4
   puts "flikback usage:"
-  puts "ruby flikbak.rb BACKUP_DIR PHOTO_TYPE"
+  puts "ruby flikbak.rb API_KEY SECRET BACKUP_DIR PHOTO_TYPE"
   puts "PHOTO_TYPE can be: square,thumbnail,small,medium,original"
   exit
 end
 
-backup_dir = ARGV[0]
-backup_photo_type = ARGV[1]
+backup_dir = ARGV[2]
+backup_photo_type = ARGV[3]
 
 if backup_photo_type != "square" and backup_photo_type != "thumbnail" and
    backup_photo_type != "small" and backup_photo_type != "medium" and
@@ -25,7 +25,7 @@ if backup_photo_type != "square" and backup_photo_type != "thumbnail" and
   exit
 end
 
-flickr = Flickr.new("39ca2ef917ca17a729af14ae64d0ab6c", "52ef83f7bc249a9c")
+flickr = Flickr.new(ARGV[0], ARGV[1])
 
 # Check to see if the saved token is still valid
 user = flickr.get_user(flickr.get_saved_auth_token)
