@@ -1,67 +1,30 @@
 Welcome to FlikBak!
 
-FlikBak is a commandline utility that backs up your Flickr photos. To do so, enter the command:
+FlikBak is a commandline utility that downloads your Flickr photos to your computer.
 
 o Requirements
 o Usage
-o Photos not in sets
 o Photos in sets
-o Collections
-o Videos
-o More information
+o Photos not in sets
 
 Requirements
 ============
-FlikBak only requires a normal install of Ruby. No extra gems are required.
+FlikBak only requires a normal install of Ruby 2. No extra gems are required.
+
+To use FlikBak you will need a Flickr API key and secret. Put them in config.rb. The first time you run FlikBack it will open the default browser for you to grant it permission to access your Flickr account. Flickr will display a code in the browser. Copy/paste this code into the terminal where requested. You only need to do this once.
 
 Usage
 =====
-ruby flikbak.rb API_KEY SECRET BACKUP_DIR PHOTO_TYPE
+ruby flikbak.rb PHOTOS_DIR
 
-	API_KEY, SECRET
-	---------------
-	Before you can use FlikBak, you need to get an api key and secret from Flickr. Go to the page:
-	http://www.flickr.com/services/api/misc.overview.html
-	login to Flickr and click on "Apply for a new API Key".
-	Choose a "Non-Commercial API Key", fill in the details and then note your api key and secret.
-	Pass these to FlikBak to start backing up your photos.
-
-	BACKUP_DIR
-	----------
-	This is the full path to the directory where you want to store your photos. The first part
-	of the path must exist. e.g.
-	/Users/flickr/photos/flickr-backup
-	the directory /Users/flickr/photos must exist. The utility will create the "flickr-backup" directory.
-
-	PHOTO_TYPE
-	----------
-	This determines which types of photo are backed up. The options are:
-	square
-	thumbnail
-	small
-	medium
-	original
-
-Photos not in sets
-==================
-Photos not in sets are downloaded to BACKUP_DIR.
+where PHOTOS_DIR is the full path to the directory where you want your Flickr photos to be stored. FlikBak will download the original version of each photo and create a JSON file with its metadata in each photo's directory in PHOTOS_DIR.
 
 Photos in sets
 ==============
 Photos in sets are downloaded to:
-BACKUP_DIR/PhotosetName/PhotoTitle.jpg
-Weird characters in the photoset name and photo title such as " " "," "/" "\"
-are changed to underscores "_" to allow them to be created as files on the disk.
+PHOTOS_DIR/PhotosetName/PhotoTitle.original_file_extension
+PHOTOS_DIR/PhotosetName/PhotoTitle.json
 
-Collections
-===========
-Currently there is no Flickr API to download collections information.
-
-Videos
-======
-Currently there is no Flickr API to download videos. They can only be streamed using the
-Flickr flash player.
-
-More information
-================
-Send any comments and suggestions to alistair@codebrane.com
+Photos not in sets
+==================
+(TBD)
