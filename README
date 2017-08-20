@@ -15,9 +15,12 @@ To use FlikBak you will need a Flickr API key and secret. Put them in config.rb.
 
 Usage
 =====
-ruby flikbak.rb PHOTOS_DIR
+ruby flikbak.rb APIKEY SECRET TOKENS_DIR PHOTOS_DIR
 
-where PHOTOS_DIR is the full path to the directory where you want your Flickr photos to be stored. FlikBak will download the original version of each photo and create a JSON file with its metadata in each photo's directory in PHOTOS_DIR.
+APIKEY = your Flickr api key.
+SECRET = your Flickr api secret.
+TOKENS_DIR = full path of directory to store oauth tokens. If this gets deleted or emptied, flickbak will rebuild the oauth tokens using the browser.
+PHOTOS_DIR = full path of directory to store downloaded photos and metadata.
 
 User info
 =========
