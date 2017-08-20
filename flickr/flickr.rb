@@ -7,6 +7,7 @@ require './flickr/model/photoset'
 require './flickr/model/photo'
 require './flickr/model/photocomment'
 require './flickr/model/userprofile'
+require './flickr/model/contact'
 
 class Flickr
   OAUTH_SIGNATURE_METHOD = "HMAC-SHA1"
@@ -96,6 +97,45 @@ class Flickr
     json = JSON.parse(login_response)
     user = User.new(json["user"]["id"], json["user"]["username"]["_content"], json["user"]["path_alias"])
   end # login
+  
+  def get_contacts
+    access_token = read_access_token(@data_dir)
+    oauth_token_secret = read_oauth_token_secret(@data_dir)
+
+    oauth_nonce = nonce
+    oauth_timestamp = now
+
+    base_string = "GET&"
+    base_string += CGI.escape("https://api.flickr.com/services/rest")
+    base_string += "&"
+    params = "format=json"
+    params += "&method=flickr.contacts.getList"
+    params += "&nojsoncallback=1"
+    params += "&oauth_consumer_key=#{@api_key}"
+    params += "&oauth_nonce=#{oauth_nonce}"
+    params += "&oauth_signature_method=#{OAUTH_SIGNATURE_METHOD}"
+    params += "&oauth_timestamp=#{oauth_timestamp}"
+    params += "&oauth_token=#{access_token}"
+    params += "&oauth_version=#{OAUTH_VERSION}"
+    base_string += CGI.escape(params)
+    signature = sign("#{@secret}&#{oauth_token_secret}", base_string)
+    url = "https://api.flickr.com/services/rest?#{params}&oauth_signature=#{CGI.escape(signature)}&method=flickr.contacts.getList"
+    rest_response = call_service(url)
+    json = JSON.parse(rest_response)
+    contacts = []
+    json['contacts']['contact'].each do |contact|
+      user_contact = Contact.new
+      user_contact.nsid = contact['nsid']
+      user_contact.username = contact['username']
+      user_contact.realname = contact['realname']
+      user_contact.friend = contact['friend']
+      user_contact.family = contact['family']
+      user_contact.path_alias = contact['path_alias']
+      user_contact.location = contact['location']
+      contacts.push(user_contact)
+    end
+    contacts
+  end # get_contacts
   
   def get_photosets
     access_token = read_access_token(@data_dir)
@@ -274,7 +314,7 @@ class Flickr
     user_profile.instagram = json['profile']['instagram']
     user_profile.pinterest = json['profile']['pinterest']
     user_profile  
-  end # get_photo_comments
+  end # get_user_profile
 
   def get_user_profile_url(userid)
     access_token = read_access_token(@data_dir)
@@ -295,7 +335,7 @@ class Flickr
     rest_response = call_service(url_rest)
     json = JSON.parse(rest_response)
     json['user']['url']
-  end # get_photo_comments
+  end # get_user_profile_url
   
   def get_user_info(userid)
     access_token = read_access_token(@data_dir)
@@ -323,7 +363,7 @@ class Flickr
     rest_response = call_service(url)
     json = JSON.parse(rest_response)
     json['person']['realname']['_content'] unless json['person']['realname'].nil?
-  end # get_photo_comments
+  end # get_user_info
   
   def download_photo(photo_url, photo_path)
     # https://stackoverflow.com/questions/2263540/how-do-i-download-a-binary-file-over-http
@@ -334,11 +374,17 @@ class Flickr
     end
   end # download_photo
   
+  def create_contacts_metadata_file(contacts, dir)
+    File.open("#{dir}/contacts.json", "wb") do |json_file|
+      json_file.write(contacts.to_json)
+    end
+  end # create_contacts_metadata_file
+  
   def create_photoset_metadata_file(photoset, dir)
     File.open("#{dir}/#{photoset.title.gsub(/[\s,\/]/, "_")}.json", "wb") do |json_file|
       json_file.write(photoset.to_json)
     end
-  end # create_photo_metadata_files
+  end # create_photoset_metadata_file
   
   def create_photo_metadata_files(photo, dir)
     File.open("#{dir}/#{photo.title.gsub(/[\s,]/, "_")}.json", "wb") do |json_file|
