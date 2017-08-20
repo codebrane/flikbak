@@ -8,6 +8,7 @@ require './flickr/model/photo'
 require './flickr/model/photocomment'
 require './flickr/model/userprofile'
 require './flickr/model/contact'
+require './flickr/model/group'
 
 class Flickr
   OAUTH_SIGNATURE_METHOD = "HMAC-SHA1"
@@ -97,7 +98,7 @@ class Flickr
     json = JSON.parse(login_response)
     user = User.new(json["user"]["id"], json["user"]["username"]["_content"], json["user"]["path_alias"])
   end # login
-  
+    
   def get_contacts
     access_token = read_access_token(@data_dir)
     oauth_token_secret = read_oauth_token_secret(@data_dir)
@@ -137,7 +138,46 @@ class Flickr
     contacts
   end # get_contacts
   
-  def get_photosets
+  def get_groups(user_id)
+    access_token = read_access_token(@data_dir)
+    oauth_token_secret = read_oauth_token_secret(@data_dir)
+
+    oauth_nonce = nonce
+    oauth_timestamp = now
+
+    base_string = "GET&"
+    base_string += CGI.escape("https://api.flickr.com/services/rest")
+    base_string += "&"
+    params = "format=json"
+    params += "&method=flickr.people.getGroups"
+    params += "&nojsoncallback=1"
+    params += "&oauth_consumer_key=#{@api_key}"
+    params += "&oauth_nonce=#{oauth_nonce}"
+    params += "&oauth_signature_method=#{OAUTH_SIGNATURE_METHOD}"
+    params += "&oauth_timestamp=#{oauth_timestamp}"
+    params += "&oauth_token=#{access_token}"
+    params += "&oauth_version=#{OAUTH_VERSION}"
+    # need to double escape the nsid as it is XXXXX@YY
+    # need XXXXX%2540YY instead of XXXXX%40YY
+    params += "&user_id=#{CGI.escape(user_id)}"
+    base_string += CGI.escape(params)
+    signature = sign("#{@secret}&#{oauth_token_secret}", base_string)
+    url = "https://api.flickr.com/services/rest?#{params}&oauth_signature=#{CGI.escape(signature)}&method=flickr.people.getGroups"
+    rest_response = call_service(url)
+    json = JSON.parse(rest_response)
+    groups = []
+    json['groups']['group'].each do |group|
+      user_group = Group.new
+      user_group.nsid = group['nsid']
+      user_group.name = group['name']
+      user_group.is_moderator = group['is_moderator']
+      user_group.is_admin = group['is_admin']
+      groups.push(user_group)
+    end
+    groups
+  end # get_groups
+  
+  def get_photosets(user_id)
     access_token = read_access_token(@data_dir)
     oauth_token_secret = read_oauth_token_secret(@data_dir)
 
@@ -146,7 +186,7 @@ class Flickr
 
     url_rest = "https://api.flickr.com/services/rest"
     url_rest += "?api_key=#{@api_key}"
-    url_rest += "&user_id=9049153@N04"
+    url_rest += "&user_id=#{user_id}"
     url_rest += "&format=json"
     url_rest += "&nojsoncallback=1"
     url_rest += "&oauth_timestamp=#{oauth_timestamp}"
@@ -374,22 +414,10 @@ class Flickr
     end
   end # download_photo
   
-  def create_contacts_metadata_file(contacts, dir)
-    File.open("#{dir}/contacts.json", "wb") do |json_file|
-      json_file.write(contacts.to_json)
+  def create_metadata_file(metadata, dir, filename)
+    File.open("#{dir}/#{filename}", "wb") do |json_file|
+      json_file.write(metadata.to_json)
     end
   end # create_contacts_metadata_file
-  
-  def create_photoset_metadata_file(photoset, dir)
-    File.open("#{dir}/#{photoset.title.gsub(/[\s,\/]/, "_")}.json", "wb") do |json_file|
-      json_file.write(photoset.to_json)
-    end
-  end # create_photoset_metadata_file
-  
-  def create_photo_metadata_files(photo, dir)
-    File.open("#{dir}/#{photo.title.gsub(/[\s,]/, "_")}.json", "wb") do |json_file|
-      json_file.write(photo.to_json)
-    end
-  end # create_photo_metadata_files
   
 end
