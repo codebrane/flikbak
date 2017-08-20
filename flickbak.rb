@@ -9,9 +9,10 @@ end
 photos_dir = ARGV[3]
 Dir.mkdir(photos_dir) unless File.exists?(photos_dir)
 
-flickr = Flickr.new(ARGV[0], ARGV[1], ARGV[2])
+tokensdir = ARGV[2]
+flickr = Flickr.new(ARGV[0], ARGV[1], tokensdir)
 
-unless File.exist?("tokens/access_token") && File.exist?("tokens/oauth_token_secret")
+unless File.exist?("#{tokensdir}/access_token") && File.exist?("#{tokensdir}/oauth_token_secret")
   flickr.get_access_token
 end
 
