@@ -420,4 +420,7 @@ class Flickr
     end
   end # create_contacts_metadata_file
   
+  def get_original_photo_url(photo)
+    "https://farm#{photo.farm}.staticflickr.com/#{photo.server}/#{photo.id}_#{photo.originalsecret}_o.#{photo.originalformat}"
+  end # get_original_photo_url
 end
