@@ -21,19 +21,24 @@ end
 user = flickr.login
 
 photosets = flickr.get_photosets
+count = 0
 photosets.each do |photoset|
-  p photoset.title
-  photos = flickr.get_photos_in_photoset(user.id, photoset.id)
+  count += 1
+  p "#{count}/#{photosets.count} #{photoset.title}"
+  photoset_dir = "#{photos_dir}/#{photoset.title.gsub(/[\s,\/]/, "_")}"
+  Dir.mkdir(photoset_dir) unless File.exists?(photoset_dir)
+  photos = flickr.get_photos_in_photoset(user.id, photoset)
   photos.each do |photo|
     original_photo_url = "https://farm#{photo.farm}.staticflickr.com/#{photo.server}/#{photo.id}_#{photo.originalsecret}_o.#{photo.originalformat}"
     photo.original_url = original_photo_url
-    photo_dir = "#{photos_dir}/#{photo.title.downcase.gsub(/[\s,]/, "_")}"
+    photo_dir = "#{photoset_dir}/#{photo.title.downcase.gsub(/[\s,]/, "_")}"
     Dir.mkdir(photo_dir) unless File.exists?(photo_dir)
     photo_filename = "#{photo_dir}/photo.#{photo.originalformat}"
     # p "downloading #{photo.title}"
     # flickr.download_photo(original_photo_url, photo_filename)
-    p "creating metadata file for #{photo.title}"
+    # p "creating metadata file for #{photo.title}"
     flickr.create_photo_metadata_files(photo, photo_dir)
   end
-  exit
+  flickr.create_photoset_metadata_file(photoset, photoset_dir)
+  # exit
 end
