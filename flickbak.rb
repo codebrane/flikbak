@@ -20,9 +20,10 @@ end
 
 user = flickr.login
 
-flickr.create_contacts_metadata_file(flickr.get_contacts, photos_dir)
+flickr.create_metadata_file(flickr.get_contacts, photos_dir, "contacts.json")
+flickr.create_metadata_file(flickr.get_groups(user.id), photos_dir, "groups.json")
 
-photosets = flickr.get_photosets
+photosets = flickr.get_photosets(user.id)
 count = 0
 photosets.each do |photoset|
   count += 1
@@ -39,8 +40,8 @@ photosets.each do |photoset|
     # p "downloading #{photo.title}"
     # flickr.download_photo(original_photo_url, photo_filename)
     # p "creating metadata file for #{photo.title}"
-    flickr.create_photo_metadata_files(photo, photo_dir)
+    flickr.create_metadata_file(photo, photo_dir, "#{photo.title.gsub(/[\s,]/, "_")}.json")
   end
-  flickr.create_photoset_metadata_file(photoset, photoset_dir)
+  flickr.create_metadata_file(photoset, photoset_dir, "#{photoset.title.gsub(/[\s,\/]/, "_")}.json")
   # exit
 end
