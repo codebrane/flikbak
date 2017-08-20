@@ -19,6 +19,12 @@ ruby flikbak.rb PHOTOS_DIR
 
 where PHOTOS_DIR is the full path to the directory where you want your Flickr photos to be stored. FlikBak will download the original version of each photo and create a JSON file with its metadata in each photo's directory in PHOTOS_DIR.
 
+User info
+=========
+The following files are created:
+PHOTOS_DIR/PhotosetName/contacts.json
+PHOTOS_DIR/PhotosetName/groups.json
+
 Photos in sets
 ==============
 Photos in sets are downloaded to:
