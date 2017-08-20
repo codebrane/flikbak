@@ -5,6 +5,8 @@ require './flickr/model/flickrobject'
 require './flickr/model/user'
 require './flickr/model/photoset'
 require './flickr/model/photo'
+require './flickr/model/photocomment'
+require './flickr/model/userprofile'
 
 class Flickr
   OAUTH_SIGNATURE_METHOD = "HMAC-SHA1"
@@ -129,13 +131,14 @@ class Flickr
       photoset.count_comments = photoset_json["count_comments"]
       photoset.date_create = photoset_json["date_create"]
       photoset.date_update = photoset_json["date_update"]
+      photoset.ownername = photoset_json["ownername"]
       photosets.push(photoset)
     end
     
     photosets
   end # get_photosets
   
-  def get_photos_in_photoset(user_id, photoset_id)
+  def get_photos_in_photoset(user_id, photoset)
     access_token = read_access_token(@data_dir)
     oauth_token_secret = read_oauth_token_secret(@data_dir)
 
@@ -147,7 +150,7 @@ class Flickr
     url_rest = "https://api.flickr.com/services/rest"
     url_rest += "?api_key=#{@api_key}"
     url_rest += "&user_id=#{user_id}"
-    url_rest += "&photoset_id=#{photoset_id}"
+    url_rest += "&photoset_id=#{photoset.id}"
     url_rest += "&extras=#{extras}"
     url_rest += "&format=json"
     url_rest += "&nojsoncallback=1"
@@ -159,6 +162,7 @@ class Flickr
     
     photos = []
     json = JSON.parse(rest_response)
+    photoset.ownername = json['photoset']['ownername']
     json["photoset"]["photo"].each do |flickr_photo|
       photo = Photo.new
       photo.id = flickr_photo["id"]
@@ -201,7 +205,125 @@ class Flickr
     photo.description = json["photo"]["description"]["_content"]
     photo.originalsecret = json["photo"]["originalsecret"]
     photo.originalformat = json["photo"]["originalformat"]
+    photo.no_of_comments = json["photo"]["comments"]["_content"]
+    if (photo.no_of_comments != "0")
+      get_photo_comments(photo)
+    end
   end # get_photo_info
+
+  def get_photo_comments(photo)
+    access_token = read_access_token(@data_dir)
+    oauth_token_secret = read_oauth_token_secret(@data_dir)
+
+    oauth_nonce = nonce
+    oauth_timestamp = now
+    
+    url_rest = "https://api.flickr.com/services/rest"
+    url_rest += "?api_key=#{@api_key}"
+    url_rest += "&photo_id=#{photo.id}"
+    url_rest += "&secret=#{photo.secret}"
+    url_rest += "&format=json"
+    url_rest += "&nojsoncallback=1"
+    url_rest += "&oauth_timestamp=#{oauth_timestamp}"
+    url_rest += "&oauth_version=#{OAUTH_VERSION}"
+    url_rest += "&oauth_token=#{access_token}"
+    url_rest += "&method=flickr.photos.comments.getList"
+    rest_response = call_service(url_rest)
+    json = JSON.parse(rest_response)
+    json["comments"]["comment"].each do |comment|
+      photocomment = PhotoComment.new
+      photocomment.date_created = comment['datecreate']
+      photocomment.author = comment['authorname']
+      photocomment.text = comment['_content']
+      photocomment.author_url = get_user_profile_url(comment['author'])
+      photocomment.user_profile = get_user_profile(comment['author'])
+      photocomment.user_profile.realname = get_user_info(photocomment.user_profile.id)
+      photo.add_comment(photocomment)
+    end
+  end # get_photo_comments
+  
+  def get_user_profile(userid)
+    access_token = read_access_token(@data_dir)
+    oauth_token_secret = read_oauth_token_secret(@data_dir)
+
+    oauth_nonce = nonce
+    oauth_timestamp = now
+    
+    url_rest = "https://api.flickr.com/services/rest"
+    url_rest += "?api_key=#{@api_key}"
+    url_rest += "&user_id=#{userid}"
+    url_rest += "&format=json"
+    url_rest += "&nojsoncallback=1"
+    url_rest += "&oauth_timestamp=#{oauth_timestamp}"
+    url_rest += "&oauth_version=#{OAUTH_VERSION}"
+    url_rest += "&oauth_token=#{access_token}"
+    url_rest += "&method=flickr.profile.getProfile"
+    rest_response = call_service(url_rest)
+    json = JSON.parse(rest_response)
+    user_profile = UserProfile.new
+    user_profile.id = json['profile']['id']
+    user_profile.nsid = json['profile']['nsid']
+    user_profile.join_date = json['profile']['join_date']
+    user_profile.occupation = json['profile']['occupation']
+    user_profile.hometown = json['profile']['hometown']
+    user_profile.showcase_set = json['profile']['showcase_set']
+    user_profile.profile_description = json['profile']['profile_description']
+    user_profile.facebook = json['profile']['facebook']
+    user_profile.twitter = json['profile']['twitter']
+    user_profile.tumblr = json['profile']['tumblr']
+    user_profile.instagram = json['profile']['instagram']
+    user_profile.pinterest = json['profile']['pinterest']
+    user_profile  
+  end # get_photo_comments
+
+  def get_user_profile_url(userid)
+    access_token = read_access_token(@data_dir)
+    oauth_token_secret = read_oauth_token_secret(@data_dir)
+
+    oauth_nonce = nonce
+    oauth_timestamp = now
+    
+    url_rest = "https://api.flickr.com/services/rest"
+    url_rest += "?api_key=#{@api_key}"
+    url_rest += "&user_id=#{userid}"
+    url_rest += "&format=json"
+    url_rest += "&nojsoncallback=1"
+    url_rest += "&oauth_timestamp=#{oauth_timestamp}"
+    url_rest += "&oauth_version=#{OAUTH_VERSION}"
+    url_rest += "&oauth_token=#{access_token}"
+    url_rest += "&method=flickr.urls.getUserProfile"
+    rest_response = call_service(url_rest)
+    json = JSON.parse(rest_response)
+    json['user']['url']
+  end # get_photo_comments
+  
+  def get_user_info(userid)
+    access_token = read_access_token(@data_dir)
+    oauth_token_secret = read_oauth_token_secret(@data_dir)
+
+    oauth_nonce = nonce
+    oauth_timestamp = now
+
+    base_string = "GET&"
+    base_string += CGI.escape("https://api.flickr.com/services/rest")
+    base_string += "&"
+    params = "format=json"
+    params += "&method=flickr.people.getInfo"
+    params += "&nojsoncallback=1"
+    params += "&oauth_consumer_key=#{@api_key}"
+    params += "&oauth_nonce=#{oauth_nonce}"
+    params += "&oauth_signature_method=#{OAUTH_SIGNATURE_METHOD}"
+    params += "&oauth_timestamp=#{oauth_timestamp}"
+    params += "&oauth_token=#{access_token}"
+    params += "&oauth_version=#{OAUTH_VERSION}"
+    params += "&user_id=#{userid}"
+    base_string += CGI.escape(params)
+    signature = sign("#{@secret}&#{oauth_token_secret}", base_string)
+    url = "https://api.flickr.com/services/rest?#{params}&oauth_signature=#{CGI.escape(signature)}&method=flickr.people.getInfo"
+    rest_response = call_service(url)
+    json = JSON.parse(rest_response)
+    json['person']['realname']['_content'] unless json['person']['realname'].nil?
+  end # get_photo_comments
   
   def download_photo(photo_url, photo_path)
     # https://stackoverflow.com/questions/2263540/how-do-i-download-a-binary-file-over-http
@@ -211,6 +333,12 @@ class Flickr
       end
     end
   end # download_photo
+  
+  def create_photoset_metadata_file(photoset, dir)
+    File.open("#{dir}/#{photoset.title.gsub(/[\s,\/]/, "_")}.json", "wb") do |json_file|
+      json_file.write(photoset.to_json)
+    end
+  end # create_photo_metadata_files
   
   def create_photo_metadata_files(photo, dir)
     File.open("#{dir}/#{photo.title.gsub(/[\s,]/, "_")}.json", "wb") do |json_file|
