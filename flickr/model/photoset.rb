@@ -15,8 +15,7 @@ class PhotoSet < FlickrObject
     'noOfComments' => @count_comments,
     'ownername' => @ownername,
     'dateCreated' => human_date(@date_create),
-#    'dateUpdated' => (@date_update == "0") ? nil : human_date(@date_update),
-    'dateUpdated' => human_date(@date_update)
+    'dateUpdated' => (@date_update == "0") ? nil : human_date(@date_update),
   }.to_json(*args)
   end
 end
