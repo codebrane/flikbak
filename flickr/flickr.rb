@@ -374,7 +374,11 @@ class Flickr
     url_rest += "&method=flickr.urls.getUserProfile"
     rest_response = call_service(url_rest)
     json = JSON.parse(rest_response)
-    json['user']['url']
+    if json['user'].nil?
+      json['message']
+    else
+      json['user']['url']
+    end
   end # get_user_profile_url
   
   def get_user_info(userid)
@@ -402,7 +406,58 @@ class Flickr
     url = "https://api.flickr.com/services/rest?#{params}&oauth_signature=#{CGI.escape(signature)}&method=flickr.people.getInfo"
     rest_response = call_service(url)
     json = JSON.parse(rest_response)
-    json['person']['realname']['_content'] unless json['person']['realname'].nil?
+    if (json['person'].nil?)
+      json['message']
+    else
+      json['person']['realname']['_content'] unless json['person']['realname'].nil?
+    end
+  end # get_user_info
+  
+  def get_photos_not_in_sets
+    access_token = read_access_token(@data_dir)
+    oauth_token_secret = read_oauth_token_secret(@data_dir)
+
+    oauth_nonce = nonce
+    oauth_timestamp = now
+    
+    extras = "description,license,date_upload,date_taken,owner_name,original_format,last_update,geo,tags,views"
+
+#    extras = "description,license,date_upload,date_taken"
+
+    base_string = "GET&"
+    base_string += CGI.escape("https://api.flickr.com/services/rest")
+    base_string += "&"
+    params = "extras=#{CGI.escape(extras)}"
+    params += "&format=json"
+    params += "&method=flickr.photos.getNotInSet"
+    params += "&nojsoncallback=1"
+    params += "&oauth_consumer_key=#{@api_key}"
+    params += "&oauth_nonce=#{oauth_nonce}"
+    params += "&oauth_signature_method=#{OAUTH_SIGNATURE_METHOD}"
+    params += "&oauth_timestamp=#{oauth_timestamp}"
+    params += "&oauth_token=#{access_token}"
+    params += "&oauth_version=#{OAUTH_VERSION}"
+    base_string += CGI.escape(params)
+    signature = sign("#{@secret}&#{oauth_token_secret}", base_string)
+    url = "https://api.flickr.com/services/rest?#{params}&oauth_signature=#{CGI.escape(signature)}&method=flickr.photos.getNotInSet"
+    rest_response = call_service(url)
+    json = JSON.parse(rest_response)
+    photos = []
+    json['photos']['photo'].each do |photo|
+      flickr_photo = Photo.new
+      flickr_photo.id = photo['id']
+      flickr_photo.secret = photo['secret']
+      flickr_photo.server = photo['server']
+      flickr_photo.farm = photo['farm']
+      flickr_photo.title = photo['title']
+      flickr_photo.dateupload = photo['dateupload']
+      flickr_photo.datetaken = photo['datetaken']
+      flickr_photo.tags = photo['tags']
+      flickr_photo.views = photo['views']
+      get_photo_info(flickr_photo)
+      photos.push(flickr_photo)
+    end
+    photos
   end # get_user_info
   
   def download_photo(photo_url, photo_path)
@@ -414,8 +469,8 @@ class Flickr
     end
   end # download_photo
   
-  def create_metadata_file(metadata, dir, filename)
-    File.open("#{dir}/#{filename}", "wb") do |json_file|
+  def create_metadata_file(metadata, filename)
+    File.open(filename, "wb") do |json_file|
       json_file.write(metadata.to_json)
     end
   end # create_contacts_metadata_file
