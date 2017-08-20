@@ -1,18 +1,15 @@
 require './flickr/flickr'
-require './config'
 
-include Config
-
-if ARGV.length != 1
-  puts 'usage: ruby flickbak.rb backupdir'
-  puts 'e.g. ruby flickbak.rb photos'
+if ARGV.length != 4
+  puts 'usage: ruby flickbak.rb apikey secret tokensdir backupdir'
+  puts 'e.g. ruby flickbak.rb APIKEY SECRET tokens photos'
   Process.exit
 end
 
-photos_dir = ARGV[0]
+photos_dir = ARGV[3]
 Dir.mkdir(photos_dir) unless File.exists?(photos_dir)
 
-flickr = Flickr.new(API_KEY, SECRET, './tokens')
+flickr = Flickr.new(ARGV[0], ARGV[1], ARGV[2])
 
 unless File.exist?("tokens/access_token") && File.exist?("tokens/oauth_token_secret")
   flickr.get_access_token
