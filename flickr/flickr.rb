@@ -9,6 +9,7 @@ require './flickr/model/photocomment'
 require './flickr/model/userprofile'
 require './flickr/model/contact'
 require './flickr/model/group'
+require './flickr/model/collection'
 
 class Flickr
   OAUTH_SIGNATURE_METHOD = "HMAC-SHA1"
@@ -422,8 +423,6 @@ class Flickr
     
     extras = "description,license,date_upload,date_taken,owner_name,original_format,last_update,geo,tags,views"
 
-#    extras = "description,license,date_upload,date_taken"
-
     base_string = "GET&"
     base_string += CGI.escape("https://api.flickr.com/services/rest")
     base_string += "&"
@@ -459,6 +458,46 @@ class Flickr
     end
     photos
   end # get_user_info
+  
+  def get_collections(user_id)
+    access_token = read_access_token(@data_dir)
+    oauth_token_secret = read_oauth_token_secret(@data_dir)
+
+    oauth_nonce = nonce
+    oauth_timestamp = now
+    
+    url_rest = "https://api.flickr.com/services/rest"
+    url_rest += "?api_key=#{@api_key}"
+    url_rest += "&user_id=#{user_id}"
+    url_rest += "&format=json"
+    url_rest += "&nojsoncallback=1"
+    url_rest += "&oauth_timestamp=#{oauth_timestamp}"
+    url_rest += "&oauth_version=#{OAUTH_VERSION}"
+    url_rest += "&oauth_token=#{access_token}"
+    url_rest += "&method=flickr.collections.getTree"
+    rest_response = call_service(url_rest)
+    json = JSON.parse(rest_response)
+    collections = []
+    json['collections']['collection'].each do |collection|
+      flickr_collection = Collection.new
+      flickr_collection.id = collection['id']
+      flickr_collection.title = collection['title']
+      flickr_collection.description = collection['description']
+      photosets = []
+      if !collection['set'].nil?
+        collection['set'].each do |set| 
+          photoset = PhotoSet.new
+          photoset.id = set['id']
+          photoset.title = set['title']
+          photoset.description = set['description']
+          photosets.push(photoset)
+        end
+        flickr_collection.sets = photosets
+      end
+      collections.push(flickr_collection)
+    end
+    collections
+  end # get_collections
   
   def download_photo(photo_url, photo_path)
     # https://stackoverflow.com/questions/2263540/how-do-i-download-a-binary-file-over-http
