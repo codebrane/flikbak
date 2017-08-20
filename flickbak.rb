@@ -3,12 +3,14 @@ require './flickr/flickr'
 if ARGV.length != 5
   p 'usage: ruby flickbak.rb apikey secret tokensdir backupdir mode'
   p 'mode can be one of:'
-  p 'sets notinset'
-  p 'e.g. ruby flickbak.rb APIKEY SECRET tokens photos'
+  p 'sets notinset collections'
+  p 'e.g. ruby flickbak.rb APIKEY SECRET tokens photos sets'
   Process.exit
 end
 
-if ((ARGV[4].downcase != 'sets') && (ARGV[4].downcase != 'notinset'))
+if ((ARGV[4].downcase != 'sets') &&
+    (ARGV[4].downcase != 'notinset') &&
+    (ARGV[4].downcase != 'collections'))
   p "#{ARGV[4]}? I don't know how to do that!"
   Process.exit
 end
@@ -32,6 +34,15 @@ flickr.create_metadata_file(flickr.get_contacts, "#{photos_dir}/contacts.json")
 p "created in #{photos_dir}/contacts.json"
 flickr.create_metadata_file(flickr.get_groups(user.id), "#{photos_dir}/groups.json")
 p "created in #{photos_dir}/groups.json"
+
+if (mode == 'collections')
+  p "Looking for your collections"
+  collections = flickr.get_collections(user.id)
+  collections.each do |collection|
+    p "#{collection.title} -> #{collection.sets.count}"
+  end
+  exit
+end
 
 if (mode == 'notinset')
   p "Looking for your photos not in a set"
