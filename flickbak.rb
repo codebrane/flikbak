@@ -35,14 +35,12 @@ photosets.each do |photoset|
   photos.each do |photo|
     photos_count += 1
     p "Photo #{photos_count}/#{photos.count} #{photo.title}"
-    original_photo_url = "https://farm#{photo.farm}.staticflickr.com/#{photo.server}/#{photo.id}_#{photo.originalsecret}_o.#{photo.originalformat}"
-    photo.original_url = original_photo_url
-    photo_dir = "#{photoset_dir}/#{photo.title.downcase.gsub(/[\s,&]/, "_")}"
+    photo.original_url = flickr.get_original_photo_url(photo)
+    photo_title_for_disk = photo.title.downcase.gsub(/[\s,&]/, "_")
+    photo_dir = "#{photoset_dir}/#{photo_title_for_disk}"
     Dir.mkdir(photo_dir) unless File.exists?(photo_dir)
-    photo_filename = "#{photo_dir}/#{photo.title.gsub(/[\s,]/, "_")}.#{photo.originalformat}"
-    flickr.download_photo(original_photo_url, photo_filename)
-    flickr.create_metadata_file(photo, photo_dir, "#{photo.title.gsub(/[\s,]/, "_")}.json")
+    flickr.download_photo(photo.original_url, "#{photo_dir}/#{photo_title_for_disk}.#{photo.originalformat}")
+    flickr.create_metadata_file(photo, photo_dir, "#{photo_title_for_disk}.json")
   end
   flickr.create_metadata_file(photoset, photoset_dir, "#{photoset.title.gsub(/[\s,\/]/, "_")}.json")
-  # exit
 end
