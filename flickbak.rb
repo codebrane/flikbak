@@ -24,22 +24,23 @@ flickr.create_metadata_file(flickr.get_contacts, photos_dir, "contacts.json")
 flickr.create_metadata_file(flickr.get_groups(user.id), photos_dir, "groups.json")
 
 photosets = flickr.get_photosets(user.id)
-count = 0
+photosets_count = 0
 photosets.each do |photoset|
-  count += 1
-  p "#{count}/#{photosets.count} #{photoset.title}"
+  photosets_count += 1
+  p "Photoset #{photosets_count}/#{photosets.count} #{photoset.title}"
   photoset_dir = "#{photos_dir}/#{photoset.title.gsub(/[\s,\/&]/, "_")}"
   Dir.mkdir(photoset_dir) unless File.exists?(photoset_dir)
   photos = flickr.get_photos_in_photoset(user.id, photoset)
+  photos_count = 0
   photos.each do |photo|
+    photos_count += 1
+    p "Photo #{photos_count}/#{photos.count} #{photo.title}"
     original_photo_url = "https://farm#{photo.farm}.staticflickr.com/#{photo.server}/#{photo.id}_#{photo.originalsecret}_o.#{photo.originalformat}"
     photo.original_url = original_photo_url
     photo_dir = "#{photoset_dir}/#{photo.title.downcase.gsub(/[\s,&]/, "_")}"
     Dir.mkdir(photo_dir) unless File.exists?(photo_dir)
-    photo_filename = "#{photo_dir}/photo.#{photo.originalformat}"
-    # p "downloading #{photo.title}"
-    # flickr.download_photo(original_photo_url, photo_filename)
-    # p "creating metadata file for #{photo.title}"
+    photo_filename = "#{photo_dir}/#{photo.title.gsub(/[\s,]/, "_")}.#{photo.originalformat}"
+    flickr.download_photo(original_photo_url, photo_filename)
     flickr.create_metadata_file(photo, photo_dir, "#{photo.title.gsub(/[\s,]/, "_")}.json")
   end
   flickr.create_metadata_file(photoset, photoset_dir, "#{photoset.title.gsub(/[\s,\/]/, "_")}.json")
