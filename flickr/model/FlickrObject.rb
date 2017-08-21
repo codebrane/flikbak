@@ -1,6 +1,8 @@
 require 'date'
 
 class FlickrObject
+  attr_accessor :type
+  
   def human_date(date)
     DateTime.strptime(date, '%s').strftime("%d/%m/%Y %H:%M:%S") unless date.nil?
   end

@@ -3,8 +3,13 @@ class UserProfile < FlickrObject
                 :profile_description, :facebook, :twitter, :tumblr,
                 :instagram, :pinterest, :id, :nsid, :realname
                 
+  def initialize
+    @type = 'userprofile'
+  end
+                
   def to_json(*args)
   {
+    'type' => @type,
     'id' => @id,
     'nsid' => @nsid,
     'realName' => @realname,

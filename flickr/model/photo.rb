@@ -7,6 +7,7 @@ class Photo < FlickrObject
                 :original_url, :no_of_comments, :comments
                 
   def initialize
+    @type = 'photo'
     @tags = []
     @comments = []
   end
@@ -21,6 +22,7 @@ class Photo < FlickrObject
   
   def to_json(*args)
   {
+    'type' => @type,
     'title' => @title,
     'description' => @description,
     'dateTaken' => human_date_from_string(@datetaken),

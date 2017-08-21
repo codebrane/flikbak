@@ -3,8 +3,13 @@ class PhotoSet < FlickrObject
                 :title, :description, :count_views, :count_comments,
                 :date_create, :date_update, :ownername
                 
+  def initialize
+    @type = 'photoset'
+  end
+                
   def to_json(*args)
   {
+    'type' => @type,
     'id' => @id,
     'primary' => @primary,
     'secret' => @secret,
