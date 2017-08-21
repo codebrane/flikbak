@@ -32,10 +32,10 @@ user = flickr.login
 
 p "Creating your contacts and groups #{user.username}"
 
-flickr.create_metadata_file(flickr.get_contacts, "#{photos_dir}/contacts.json")
-p "created in #{photos_dir}/contacts.json"
-flickr.create_metadata_file(flickr.get_groups(user.id), "#{photos_dir}/groups.json")
-p "created in #{photos_dir}/groups.json"
+user_dir = "#{photos_dir}/user"
+Dir.mkdir(user_dir) unless File.exists?(user_dir)
+flickr.create_metadata_file(flickr.get_contacts, "#{user_dir}/contacts.json")
+flickr.create_metadata_file(flickr.get_groups(user.id), "#{user_dir}/groups.json")
 
 title_tidy = "[\s,\/&.']"
 
@@ -114,7 +114,7 @@ if (mode == 'sets')
   photosets.each do |photoset|
     photosets_count += 1
     p "Photoset #{photosets_count}/#{photosets.count} #{photoset.title}"
-    photoset_dir = "#{photos_dir}/#{photoset.title.gsub(/#{title_tidy}/, "_")}"
+    photoset_dir = "#{photos_dir}/sets/#{photoset.title.gsub(/#{title_tidy}/, "_")}"
     Dir.mkdir(photoset_dir) unless File.exists?(photoset_dir)
     photos = flickr.get_photos_in_photoset(user.id, photoset)
     photos_count = 0
