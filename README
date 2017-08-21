@@ -36,4 +36,13 @@ PHOTOS_DIR/PhotosetName/PhotoTitle.json
 
 Photos not in sets
 ==================
-(TBD)
+Photos not in sets are downloaded to:
+PHOTOS_DIR/not_in_set/PhotoTitle.original_file_extension
+PHOTOS_DIR/not_in_set/PhotoTitle.json
+
+Collections
+==================
+Collections are downloaded to:
+PHOTOS_DIR/collections/CollectionTitle-CollectionId/PhotosetTitle-PhotosetId/PhotosetTitle.json
+PHOTOS_DIR/collections/CollectionTitle-CollectionId/PhotosetTitle-PhotosetId/PhotoTitle-PhotoId/PhotoTitle.original_file_extension
+PHOTOS_DIR/collections/CollectionTitle-CollectionId/PhotosetTitle-PhotosetId/PhotoTitle-PhotoId/PhotoTitle.json
