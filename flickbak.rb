@@ -1,5 +1,7 @@
 require_relative 'flickr/flickr'
 
+MAX_DOWNLOAD_TRIES = 10
+
 if ARGV.length != 5
   p 'usage: ruby flickbak.rb apikey secret tokensdir backupdir mode'
   p 'mode can be one of:'
@@ -67,7 +69,9 @@ if (mode == 'collections')
           photo_title_for_disk = "#{photo.title.downcase.gsub(/#{title_tidy}/, "_")}-#{photo.id}"
           photo_dir = "#{photoset_dir}/#{photo_title_for_disk}"
           Dir.mkdir(photo_dir) unless File.exists?(photo_dir)
-          flickr.download_photo(photo.original_url, "#{photo_dir}/#{photo_title_for_disk}.#{photo.originalformat}")
+          flickr.download_photo(photo.original_url,
+            "#{photo_dir}/#{photo_title_for_disk}.#{photo.originalformat}",
+            MAX_DOWNLOAD_TRIES)
           flickr.create_metadata_file(photo, "#{photo_dir}/#{photo_title_for_disk}.json")
         end
         flickr.create_metadata_file(photoset, "#{photoset_dir}/#{photoset.title.gsub(/#{title_tidy}/, "_")}.json")
@@ -90,7 +94,12 @@ if (mode == 'notinset')
     Dir.mkdir(not_in_set_dir) unless File.exists?(not_in_set_dir)
     photo_dir = "#{not_in_set_dir}/#{photo_title_for_disk}"
     Dir.mkdir(photo_dir) unless File.exists?(photo_dir)
-    flickr.download_photo(photo.original_url, "#{photo_dir}/#{photo_title_for_disk}.#{photo.originalformat}")
+    downloaded = flickr.download_photo(photo.original_url,
+      "#{photo_dir}/#{photo_title_for_disk}.#{photo.originalformat}",
+      MAX_DOWNLOAD_TRIES)
+    if (!downloaded)
+      p "could not download #{photo.original_url} to #{photo_dir}/#{photo_title_for_disk}.#{photo.originalformat}"
+    end
     flickr.create_metadata_file(photo, "#{photo_dir}/#{photo_title_for_disk}.json")
   end
 end
@@ -113,7 +122,9 @@ if (mode == 'sets')
       photo_title_for_disk = "#{photo.title.downcase.gsub(/#{title_tidy}/, "_")}-#{photo.id}"
       photo_dir = "#{photoset_dir}/#{photo_title_for_disk}"
       Dir.mkdir(photo_dir) unless File.exists?(photo_dir)
-      flickr.download_photo(photo.original_url, "#{photo_dir}/#{photo_title_for_disk}.#{photo.originalformat}")
+      flickr.download_photo(photo.original_url,
+        "#{photo_dir}/#{photo_title_for_disk}.#{photo.originalformat}",
+        MAX_DOWNLOAD_TRIES)
       flickr.create_metadata_file(photo, "#{photo_dir}/#{photo_title_for_disk}.json")
     end
     flickr.create_metadata_file(photoset, "#{photoset_dir}/#{photoset.title.gsub(/#{title_tidy}/, "_")}.json")
