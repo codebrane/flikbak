@@ -499,13 +499,32 @@ class Flickr
     collections
   end # get_collections
   
-  def download_photo(photo_url, photo_path)
-    # https://stackoverflow.com/questions/2263540/how-do-i-download-a-binary-file-over-http
-    File.open(photo_path, "wb") do |saved_file|
-      open(photo_url, "rb") do |read_file|
-        saved_file.write(read_file.read)
+  def download_photo(photo_url, photo_path, maxtries)
+    downloaded = false
+    count = 0
+    
+    loop do
+    
+      bytes_expected = 0
+      bytes_copied = 0
+      
+      File.open(photo_path, "wb") do |photo_file|
+        photo_to_download = open(photo_url, "rb")
+        bytes_expected = photo_to_download.meta['content-length']
+        bytes_copied = IO.copy_stream photo_to_download, photo_file
+        if bytes_expected.to_i == bytes_copied
+          downloaded = true
+        end
       end
+      
+      break if downloaded
+      
+      count += 1
+      break if count > maxtries
+    
     end
+    
+    downloaded
   end # download_photo
   
   def create_metadata_file(metadata, filename)
