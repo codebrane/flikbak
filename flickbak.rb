@@ -69,9 +69,12 @@ if (mode == 'collections')
           photo_title_for_disk = "#{photo.title.downcase.gsub(/#{title_tidy}/, "_")}-#{photo.id}"
           photo_dir = "#{photoset_dir}/#{photo_title_for_disk}"
           Dir.mkdir(photo_dir) unless File.exists?(photo_dir)
-          flickr.download_photo(photo.original_url,
+          downloaded = flickr.download_photo(photo.original_url,
             "#{photo_dir}/#{photo_title_for_disk}.#{photo.originalformat}",
             MAX_DOWNLOAD_TRIES)
+          if (!downloaded)
+            p "could not download #{photo.original_url} to #{photo_dir}/#{photo_title_for_disk}.#{photo.originalformat}"
+          end
           flickr.create_metadata_file(photo, "#{photo_dir}/#{photo_title_for_disk}.json")
         end
         flickr.create_metadata_file(photoset, "#{photoset_dir}/#{photoset.title.gsub(/#{title_tidy}/, "_")}.json")
@@ -122,9 +125,12 @@ if (mode == 'sets')
       photo_title_for_disk = "#{photo.title.downcase.gsub(/#{title_tidy}/, "_")}-#{photo.id}"
       photo_dir = "#{photoset_dir}/#{photo_title_for_disk}"
       Dir.mkdir(photo_dir) unless File.exists?(photo_dir)
-      flickr.download_photo(photo.original_url,
+      downloaded = flickr.download_photo(photo.original_url,
         "#{photo_dir}/#{photo_title_for_disk}.#{photo.originalformat}",
         MAX_DOWNLOAD_TRIES)
+      if (!downloaded)
+        p "could not download #{photo.original_url} to #{photo_dir}/#{photo_title_for_disk}.#{photo.originalformat}"
+      end
       flickr.create_metadata_file(photo, "#{photo_dir}/#{photo_title_for_disk}.json")
     end
     flickr.create_metadata_file(photoset, "#{photoset_dir}/#{photoset.title.gsub(/#{title_tidy}/, "_")}.json")
