@@ -65,7 +65,7 @@ if (mode == 'collections')
           photo_title_for_disk = "#{photo.title.downcase.gsub(/[\s,\/&]/, "_")}-#{photo.id}"
           photo_dir = "#{photoset_dir}/#{photo_title_for_disk}"
           Dir.mkdir(photo_dir) unless File.exists?(photo_dir)
-#          flickr.download_photo(photo.original_url, "#{photo_dir}/#{photo_title_for_disk}.#{photo.originalformat}")
+          flickr.download_photo(photo.original_url, "#{photo_dir}/#{photo_title_for_disk}.#{photo.originalformat}")
           flickr.create_metadata_file(photo, "#{photo_dir}/#{photo_title_for_disk}.json")
         end
         flickr.create_metadata_file(photoset, "#{photoset_dir}/#{photoset.title.gsub(/[\s,\/]/, "_")}.json")
