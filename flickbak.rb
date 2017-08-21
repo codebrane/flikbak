@@ -1,4 +1,4 @@
-require './flickr/flickr'
+require_relative 'flickr/flickr'
 
 if ARGV.length != 5
   p 'usage: ruby flickbak.rb apikey secret tokensdir backupdir mode'
