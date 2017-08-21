@@ -1,6 +1,8 @@
 require_relative 'flickr/flickr'
+require 'logger'
 
 MAX_DOWNLOAD_TRIES = 10
+LOG_DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
 
 if ARGV.length != 5
   p 'usage: ruby flickbak.rb apikey secret tokensdir backupdir mode'
@@ -30,8 +32,10 @@ end
 
 user = flickr.login
 
-p "Creating your contacts and groups #{user.username}"
+log_dir = "#{photos_dir}/logs"
+Dir.mkdir(log_dir) unless File.exists?(log_dir)
 
+p "Creating your contacts and groups #{user.username}"
 user_dir = "#{photos_dir}/user"
 Dir.mkdir(user_dir) unless File.exists?(user_dir)
 flickr.create_metadata_file(flickr.get_contacts, "#{user_dir}/contacts.json")
@@ -41,6 +45,12 @@ title_tidy = "[\s,\/&.']"
 
 if (mode == 'collections')
   p "Looking for your collections"
+  
+  log = Logger.new("#{log_dir}/collections.log")
+  log.formatter = proc do |severity, datetime, progname, msg|
+    date_format = datetime.strftime(LOG_DATETIME_FORMAT)
+    "[#{date_format}] #{severity} #{msg}\n"
+  end  
   
   collections_dir = "#{photos_dir}/collections"
   Dir.mkdir(collections_dir) unless File.exists?(collections_dir)
@@ -76,6 +86,7 @@ if (mode == 'collections')
             p "could not download #{photo.original_url} to #{photo_dir}/#{photo_title_for_disk}.#{photo.originalformat}"
           end
           flickr.create_metadata_file(photo, "#{photo_dir}/#{photo_title_for_disk}.json")
+          log.info("#{ollection.title}|#{photoset.title}|#{photo.title}|#{photo.id}|#{photo_dir}/#{photo_title_for_disk}.#{photo.originalformat}")
         end
         flickr.create_metadata_file(photoset, "#{photoset_dir}/#{photoset.title.gsub(/#{title_tidy}/, "_")}.json")
       end
@@ -86,6 +97,13 @@ end
 
 if (mode == 'notinset')
   p "Looking for your photos not in a set"
+  
+  log = Logger.new("#{log_dir}/notinset.log")
+  log.formatter = proc do |severity, datetime, progname, msg|
+    date_format = datetime.strftime(LOG_DATETIME_FORMAT)
+    "[#{date_format}] #{severity} #{msg}\n"
+  end  
+  
   photos_not_in_sets = flickr.get_photos_not_in_sets
   photos_count = 0
   photos_not_in_sets.each do |photo|
@@ -104,11 +122,19 @@ if (mode == 'notinset')
       p "could not download #{photo.original_url} to #{photo_dir}/#{photo_title_for_disk}.#{photo.originalformat}"
     end
     flickr.create_metadata_file(photo, "#{photo_dir}/#{photo_title_for_disk}.json")
+    log.info("#{photo.title}|#{photo.id}|#{photo_dir}/#{photo_title_for_disk}.#{photo.originalformat}")
   end
 end
 
 if (mode == 'sets')
   p "Looking for your photosets"
+  
+  log = Logger.new("#{log_dir}/sets.log")
+  log.formatter = proc do |severity, datetime, progname, msg|
+    date_format = datetime.strftime(LOG_DATETIME_FORMAT)
+    "[#{date_format}] #{severity} #{msg}\n"
+  end  
+  
   photosets = flickr.get_photosets(user.id)
   photosets_count = 0
   photosets.each do |photoset|
@@ -132,6 +158,7 @@ if (mode == 'sets')
         p "could not download #{photo.original_url} to #{photo_dir}/#{photo_title_for_disk}.#{photo.originalformat}"
       end
       flickr.create_metadata_file(photo, "#{photo_dir}/#{photo_title_for_disk}.json")
+      log.info("#{photoset.title}|#{photo.title}|#{photo.id}|#{photo_dir}/#{photo_title_for_disk}.#{photo.originalformat}")
     end
     flickr.create_metadata_file(photoset, "#{photoset_dir}/#{photoset.title.gsub(/#{title_tidy}/, "_")}.json")
   end
