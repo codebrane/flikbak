@@ -31,15 +31,15 @@ After running the above your Flickr OAuth tokens will be stored in /Users/you/fl
 User info
 =========
 The following files are created:
-PHOTOS_DIR/contacts.json
-PHOTOS_DIR/groups.json
+PHOTOS_DIR/user/contacts.json
+PHOTOS_DIR/user/groups.json
 
 Photos in sets
 ==============
 Photos in sets are downloaded to:
-PHOTOS_DIR/PhotosetTitle-PhotosetId/PhotosetTitle.json
-PHOTOS_DIR/PhotosetTitle-PhotosetId/PhotoTitle-PhotoId/PhotoTitle.original_file_extension
-PHOTOS_DIR/PhotosetTitle-PhotosetId/PhotoTitle-PhotoId/PhotoTitle.json
+PHOTOS_DIR/sets/PhotosetTitle-PhotosetId/PhotosetTitle.json
+PHOTOS_DIR/sets/PhotosetTitle-PhotosetId/PhotoTitle-PhotoId/PhotoTitle.original_file_extension
+PHOTOS_DIR/sets/PhotosetTitle-PhotosetId/PhotoTitle-PhotoId/PhotoTitle.json
 
 Photos not in sets
 ==================
