@@ -86,7 +86,7 @@ if (mode == 'collections')
             p "could not download #{photo.original_url} to #{photo_dir}/#{photo_title_for_disk}.#{photo.originalformat}"
           end
           flickr.create_metadata_file(photo, "#{photo_dir}/#{photo_title_for_disk}.json")
-          log.info("#{ollection.title}|#{photoset.title}|#{photo.title}|#{photo.id}|#{photo_dir}/#{photo_title_for_disk}.#{photo.originalformat}")
+          log.info("#{collection.title}|#{photoset.title}|#{photo.title}|#{photo.id}|#{photo_dir}/#{photo_title_for_disk}.#{photo.originalformat}")
         end
         flickr.create_metadata_file(photoset, "#{photoset_dir}/#{photoset.title.gsub(/#{title_tidy}/, "_")}.json")
       end
