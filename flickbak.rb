@@ -129,6 +129,9 @@ end
 if (mode == 'sets')
   p "Looking for your photosets"
   
+  photosets_dir = "#{photos_dir}/sets"
+  Dir.mkdir(photosets_dir) unless File.exists?(photosets_dir)
+  
   log = Logger.new("#{log_dir}/sets.log")
   log.formatter = proc do |severity, datetime, progname, msg|
     date_format = datetime.strftime(LOG_DATETIME_FORMAT)
@@ -140,7 +143,7 @@ if (mode == 'sets')
   photosets.each do |photoset|
     photosets_count += 1
     p "Photoset #{photosets_count}/#{photosets.count} #{photoset.title}"
-    photoset_dir = "#{photos_dir}/sets/#{photoset.title.gsub(/#{title_tidy}/, "_")}"
+    photoset_dir = "#{photosets_dir}/#{photoset.title.gsub(/#{title_tidy}/, "_")}"
     Dir.mkdir(photoset_dir) unless File.exists?(photoset_dir)
     photos = flickr.get_photos_in_photoset(user.id, photoset)
     photos_count = 0
