@@ -511,9 +511,13 @@ class Flickr
       File.open(photo_path, "wb") do |photo_file|
         photo_to_download = open(photo_url, "rb")
         bytes_expected = photo_to_download.meta['content-length']
-        bytes_copied = IO.copy_stream photo_to_download, photo_file
-        if bytes_expected.to_i == bytes_copied
-          downloaded = true
+        begin
+          bytes_copied = IO.copy_stream photo_to_download, photo_file
+          if bytes_expected.to_i == bytes_copied
+            downloaded = true
+          end
+        rescue Net::OpenTimeout
+          # continue trying via the loop
         end
       end
       
