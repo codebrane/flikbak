@@ -4,11 +4,13 @@ require 'logger'
 MAX_DOWNLOAD_TRIES = 10
 LOG_DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
 
-if ARGV.length != 5
-  p 'usage: ruby flickbak.rb apikey secret tokensdir backupdir mode'
+if ARGV.length != 6
+  p 'usage: ruby flickbak.rb apikey secret tokensdir backupdir mode overwrite'
   p 'mode can be one of:'
   p 'sets notinset collections'
-  p 'e.g. ruby flickbak.rb APIKEY SECRET tokens photos sets'
+  p 'overwrite can be one of:'
+  p 'overwrite keep'
+  p 'e.g. ruby flickbak.rb APIKEY SECRET tokens photos sets overwrite'
   Process.exit
 end
 
@@ -19,6 +21,13 @@ if ((ARGV[4].downcase != 'sets') &&
   Process.exit
 end
 mode = ARGV[4].downcase
+
+if ((ARGV[5].downcase != 'overwrite') &&
+    (ARGV[5].downcase != 'keep'))
+  p "#{ARGV[5]}? I don't know how to do that!"
+  Process.exit
+end
+overwrite = (ARGV[5].downcase == "overwrite") ? true : false
 
 photos_dir = ARGV[3]
 Dir.mkdir(photos_dir) unless File.exists?(photos_dir)
@@ -79,19 +88,34 @@ if (mode == 'collections')
           photo_title_for_disk = "#{photo.title.downcase.gsub(/#{title_tidy}/, "_")}-#{photo.id}"
           photo_dir = "#{photoset_dir}/#{photo_title_for_disk}"
           Dir.mkdir(photo_dir) unless File.exists?(photo_dir)
-          downloaded = flickr.download_photo(photo.original_url,
-            "#{photo_dir}/#{photo_title_for_disk}.#{photo.originalformat}",
-            MAX_DOWNLOAD_TRIES)
-          if (!downloaded)
-            p "could not download #{photo.original_url} to #{photo_dir}/#{photo_title_for_disk}.#{photo.originalformat}"
+          
+          downloaded_photo_file_path = "#{photo_dir}/#{photo_title_for_disk}.#{photo.originalformat}"
+          if (((File.exists?(downloaded_photo_file_path)) && (overwrite)) ||
+              (!File.exists?(downloaded_photo_file_path)))
+            downloaded = flickr.download_photo(photo.original_url,
+              downloaded_photo_file_path,
+              MAX_DOWNLOAD_TRIES)
+            if (!downloaded)
+              p "could not download #{photo.original_url} to #{photo_dir}/#{photo_title_for_disk}.#{photo.originalformat}"
+            end
+          else
+            p "skipping downloaded photo #{downloaded_photo_file_path}"
           end
-          flickr.create_metadata_file(photo, "#{photo_dir}/#{photo_title_for_disk}.json")
+          
+          downloaded_photo_metadata_file_path = "#{photo_dir}/#{photo_title_for_disk}.json"
+          if (((File.exists?(downloaded_photo_metadata_file_path)) && (overwrite)) ||
+              (!File.exists?(downloaded_photo_metadata_file_path)))
+            flickr.create_metadata_file(photo, downloaded_photo_metadata_file_path)
+          else
+            p "skipping downloaded photo metadata #{downloaded_photo_metadata_file_path}"
+          end
+          
           log.info("#{collection.title}|#{photoset.title}|#{photo.title}|#{photo.id}|#{photo_dir}/#{photo_title_for_disk}.#{photo.originalformat}")
-        end
+        end # photos.each do |photo|
         flickr.create_metadata_file(photoset, "#{photoset_dir}/#{photoset.title.gsub(/#{title_tidy}/, "_")}.json")
-      end
-    end
-  end
+      end # collection.sets.each do |photoset|
+    end # if (collection.sets.count > 0)
+  end # collections.each do |collection|
   exit
 end
 
@@ -115,15 +139,29 @@ if (mode == 'notinset')
     Dir.mkdir(not_in_set_dir) unless File.exists?(not_in_set_dir)
     photo_dir = "#{not_in_set_dir}/#{photo_title_for_disk}"
     Dir.mkdir(photo_dir) unless File.exists?(photo_dir)
-    downloaded = flickr.download_photo(photo.original_url,
-      "#{photo_dir}/#{photo_title_for_disk}.#{photo.originalformat}",
-      MAX_DOWNLOAD_TRIES)
-    if (!downloaded)
-      p "could not download #{photo.original_url} to #{photo_dir}/#{photo_title_for_disk}.#{photo.originalformat}"
+    
+    downloaded_photo_file_path = "#{photo_dir}/#{photo_title_for_disk}.#{photo.originalformat}"
+    if (((File.exists?(downloaded_photo_file_path)) && (overwrite)) ||
+        (!File.exists?(downloaded_photo_file_path)))
+      downloaded = flickr.download_photo(photo.original_url, downloaded_photo_file_path,
+        MAX_DOWNLOAD_TRIES)
+      if (!downloaded)
+        p "could not download #{photo.original_url} to #{photo_dir}/#{photo_title_for_disk}.#{photo.originalformat}"
+      end
+    else
+      p "skipping downloaded photo #{downloaded_photo_file_path}"
     end
-    flickr.create_metadata_file(photo, "#{photo_dir}/#{photo_title_for_disk}.json")
+    
+    downloaded_photo_metadata_file_path = "#{photo_dir}/#{photo_title_for_disk}.json"
+    if (((File.exists?(downloaded_photo_metadata_file_path)) && (overwrite)) ||
+        (!File.exists?(downloaded_photo_metadata_file_path)))
+      flickr.create_metadata_file(photo, downloaded_photo_metadata_file_path)
+    else
+      p "skipping downloaded photo metadata #{downloaded_photo_metadata_file_path}"
+    end    
+    
     log.info("#{photo.title}|#{photo.id}|#{photo_dir}/#{photo_title_for_disk}.#{photo.originalformat}")
-  end
+  end # photos_not_in_sets.each do |photo|
 end
 
 if (mode == 'sets')
@@ -154,15 +192,29 @@ if (mode == 'sets')
       photo_title_for_disk = "#{photo.title.downcase.gsub(/#{title_tidy}/, "_")}-#{photo.id}"
       photo_dir = "#{photoset_dir}/#{photo_title_for_disk}"
       Dir.mkdir(photo_dir) unless File.exists?(photo_dir)
-      downloaded = flickr.download_photo(photo.original_url,
-        "#{photo_dir}/#{photo_title_for_disk}.#{photo.originalformat}",
-        MAX_DOWNLOAD_TRIES)
-      if (!downloaded)
-        p "could not download #{photo.original_url} to #{photo_dir}/#{photo_title_for_disk}.#{photo.originalformat}"
-      end
-      flickr.create_metadata_file(photo, "#{photo_dir}/#{photo_title_for_disk}.json")
+      
+      downloaded_photo_file_path = "#{photo_dir}/#{photo_title_for_disk}.#{photo.originalformat}"
+      if (((File.exists?(downloaded_photo_file_path)) && (overwrite)) ||
+          (!File.exists?(downloaded_photo_file_path)))
+        downloaded = flickr.download_photo(photo.original_url, downloaded_photo_file_path,
+          MAX_DOWNLOAD_TRIES)
+        if (!downloaded)
+          p "could not download #{photo.original_url} to #{photo_dir}/#{photo_title_for_disk}.#{photo.originalformat}"
+        end
+      else
+        p "skipping downloaded photo #{downloaded_photo_metadata_file_path}"
+      end      
+      
+      downloaded_photo_metadata_file_path = "#{photo_dir}/#{photo_title_for_disk}.json"
+      if (((File.exists?(downloaded_photo_metadata_file_path)) && (overwrite)) ||
+          (!File.exists?(downloaded_photo_metadata_file_path)))
+        flickr.create_metadata_file(photo, downloaded_photo_metadata_file_path)
+      else
+        p "skipping downloaded photo metadata #{downloaded_photo_metadata_file_path}"
+      end      
+      
       log.info("#{photoset.title}|#{photo.title}|#{photo.id}|#{photo_dir}/#{photo_title_for_disk}.#{photo.originalformat}")
-    end
+    end # photos.each do |photo|
     flickr.create_metadata_file(photoset, "#{photoset_dir}/#{photoset.title.gsub(/#{title_tidy}/, "_")}.json")
-  end
+  end # photosets.each do |photoset|
 end
