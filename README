@@ -11,11 +11,11 @@ Requirements
 ============
 FlikBak only requires a normal install of Ruby 2. No extra gems are required.
 
-To use FlikBak you will need a Flickr API key and secret. The first time you run FlikBack it will open the default browser for you to grant it permission to access your Flickr account. Flickr will display a code in the browser. Copy/paste this code into the terminal where requested. You only need to do this once as the OAuth tokens are stored in the TOKENS_DIR parameter.
+To use FlikBak you will need a Flickr API key and secret. The first time you run FlikBack it will open the default browser for you to grant it permission to access your Flickr account. Flickr will display a code in the browser. Copy/paste this code into the terminal where requested. You only need to do this once as the OAuth tokens are stored in TOKENS_DIR. If you delete the tokens, FlikBak will recreate them using the browser.
 
 Usage
 =====
-ruby flickbak.rb APIKEY SECRET TOKENS_DIR PHOTOS_DIR MODE OVERWRITE
+ruby flikbak.rb APIKEY SECRET TOKENS_DIR PHOTOS_DIR MODE OVERWRITE
 
 APIKEY = your Flickr api key.
 SECRET = your Flickr api secret.
@@ -25,11 +25,9 @@ MODE = One of: sets notinset collections
 OVERWRITE = one of: overwrite keep
 
 e.g. to download all your collections:
-ruby flickbak.rb YOUR_APIKEY YOUR_SECRET /Users/you/flickr/tokens /Users/you/flickr/photos collections overwrite
+ruby flikbak.rb YOUR_APIKEY YOUR_SECRET /Users/you/flickr/tokens /Users/you/flickr/photos collections overwrite
 
-After running the above your Flickr OAuth tokens will be stored in /Users/you/flickr/tokens. If you delete these, FlikBak will recreate them by asking you to grant permissions via the browser again. Your collections will be in /Users/you/flickr/photos/collections
-
-If you have to cancel FlikBak during a lengthy sets download, use keep as the OVERWRITE parameter next time to skip over those you've already downloaded. If you need to redownload photos, set it to overwrite.
+If you have to cancel FlikBak during a lengthy download, use keep as the OVERWRITE parameter next time to skip over those you've already downloaded. If you need to redownload photos, set it to overwrite.
 
 User info
 =========
@@ -41,18 +39,18 @@ Photos in sets
 ==============
 Photos in sets are downloaded to:
 PHOTOS_DIR/sets/PhotosetTitle-PhotosetId/PhotosetTitle.json
-PHOTOS_DIR/sets/PhotosetTitle-PhotosetId/PhotoTitle-PhotoId/PhotoTitle.original_file_extension
-PHOTOS_DIR/sets/PhotosetTitle-PhotosetId/PhotoTitle-PhotoId/PhotoTitle.json
+PHOTOS_DIR/sets/PhotosetTitle-PhotosetId/PhotoTitle-PhotoId/PhotoTitle-PhotoId.original_file_extension
+PHOTOS_DIR/sets/PhotosetTitle-PhotosetId/PhotoTitle-PhotoId/PhotoTitle-PhotoId.json
 
 Photos not in sets
 ==================
 Photos not in sets are downloaded to:
-PHOTOS_DIR/not_in_set/PhotoTitle-PhotoId/PhotoTitle.original_file_extension
-PHOTOS_DIR/not_in_set/PhotoTitle-PhotoId/PhotoTitle.json
+PHOTOS_DIR/not_in_set/PhotoTitle-PhotoId/PhotoTitle-PhotoId.original_file_extension
+PHOTOS_DIR/not_in_set/PhotoTitle-PhotoId/PhotoTitle-PhotoId.json
 
 Collections
 ==================
 Collections are downloaded to:
-PHOTOS_DIR/collections/CollectionTitle-CollectionId/PhotosetTitle-PhotosetId/PhotosetTitle.json
-PHOTOS_DIR/collections/CollectionTitle-CollectionId/PhotosetTitle-PhotosetId/PhotoTitle-PhotoId/PhotoTitle.original_file_extension
-PHOTOS_DIR/collections/CollectionTitle-CollectionId/PhotosetTitle-PhotosetId/PhotoTitle-PhotoId/PhotoTitle.json
+PHOTOS_DIR/collections/CollectionTitle-CollectionId/PhotosetTitle/PhotosetTitle.json
+PHOTOS_DIR/collections/CollectionTitle-CollectionId/PhotosetTitle/PhotoTitle-PhotoId/PhotoTitle-PhotoId.original_file_extension
+PHOTOS_DIR/collections/CollectionTitle-CollectionId/PhotosetTitle/PhotoTitle-PhotoId/PhotoTitle-PhotoId.json
