@@ -15,18 +15,21 @@ To use FlikBak you will need a Flickr API key and secret. The first time you run
 
 Usage
 =====
-ruby flickbak.rb APIKEY SECRET TOKENS_DIR PHOTOS_DIR MODE
+ruby flickbak.rb APIKEY SECRET TOKENS_DIR PHOTOS_DIR MODE OVERWRITE
 
 APIKEY = your Flickr api key.
 SECRET = your Flickr api secret.
 TOKENS_DIR = full path of directory to store oauth tokens. If this gets deleted or emptied, flickbak will rebuild the oauth tokens using the browser.
 PHOTOS_DIR = full path of directory to store downloaded photos and metadata.
 MODE = One of: sets notinset collections
+OVERWRITE = one of: overwrite keep
 
 e.g. to download all your collections:
-ruby flickbak.rb YOUR_APIKEY YOUR_SECRET /Users/you/flickr/tokens /Users/you/flickr/photos collections
+ruby flickbak.rb YOUR_APIKEY YOUR_SECRET /Users/you/flickr/tokens /Users/you/flickr/photos collections overwrite
 
 After running the above your Flickr OAuth tokens will be stored in /Users/you/flickr/tokens. If you delete these, FlikBak will recreate them by asking you to grant permissions via the browser again. Your collections will be in /Users/you/flickr/photos/collections
+
+If you have to cancel FlikBak during a lengthy sets download, use keep as the OVERWRITE parameter next time to skip over those you've already downloaded. If you need to redownload photos, set it to overwrite.
 
 User info
 =========
